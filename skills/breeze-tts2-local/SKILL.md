@@ -15,9 +15,31 @@ description: 在本地安装、运行和验证 Breeze TTS 2 的中文或英文�
 
 安装 Python 3.12 独立 venv，按官方 `requirements.txt` 安装 PyTorch 2.9.1 及相应 CUDA 版、torchaudio 和其余依赖；若解析器在新版 Gradio 反复回溯，可试 `gradio<6`，必须通过实际运行验证。先采用 eager，不默认启用需要额外编译的加速组件。
 
+从 Linux 或 WSL2 中使用实际工作目录（以下示意变量按机器替换），不要把现有用户项目覆盖：
+
+```bash
+python3 -m venv /path/to/isolated-breeze-venv
+PIP=/path/to/isolated-breeze-venv/bin/pip
+PY=/path/to/isolated-breeze-venv/bin/python
+git clone https://github.com/breezeblue-ai/breeze-tts.git /path/to/breeze-tts
+git -C /path/to/breeze-tts checkout daa6cb2efe5471f09369229f322d20bb956cb3c3
+"$PIP" install torch==2.9.1 torchaudio==2.9.1 --index-url https://download.pytorch.org/whl/cu128
+"$PIP" install 'gradio<6' -r /path/to/breeze-tts/requirements.txt
+"$PY" -c 'import torch; print(torch.__version__,torch.cuda.is_available())'
+```
+
+用 Hugging Face Hub 下载模型完整目录（如网络不稳定可用已有 `hf-download` 技能）；核对官方快照中 `audio_tokenizer` 及两片权重、tokenizer 文件均齐全，按 LFS 哈希验证。文件不可用时不得对局部文件继续推理。依赖锁定与 CUDA wheel 选择按实际系统调整，安装后 `pip check` 和实测验证。
+
 ## 运行和验证
 
 官方 `infer.py` 接受本地完整模型目录和 `--text`；无参考的声音设计传 `--instruction` 及 `--cfg-scale 4`。克隆时同时提供 `--ref-audio` 和其准确的 `--ref-text`；再加 instruction 才是参考引导的语音控制。随机种子、输入、版本、设备、输出时长与耗时一并记录。
+
+```bash
+cd /path/to/breeze-tts
+"$PY" infer.py /path/to/model-snapshot --text '欢迎来到语音测试。' \
+  --instruction '一位成年女性，普通话清晰，语速适中，语气自然。' \
+  --cfg-scale 4 --seed 42 --output /path/to/output.wav
+```
 
 本机观察：RTX 3080 20 GiB、Ubuntu WSL2、CUDA PyTorch 2.9.1、eager，首个中文音频 9.28 秒，包含模型加载的端到端耗时 221.83 秒，GPU 总显存采样峰值 9320 MiB；复用模型后 5 条声音设计样本生成 6.8–8 秒音频各约 64–83 秒，未装 flash-attn。这些是特定设置的有限样本，不代表实时或通用表现。启动时出现 SoX 可执行文件未找到提示，声音设计与使用 WAV 参考的克隆仍成功；其他模式不能由此推断。
 
