@@ -11,6 +11,9 @@
 - [本地部署 Skill](skills/breeze-tts2-local/SKILL.md)：安装、验证、模型文件、测试与许可注意事项。
 - [官方代码和推理方式](https://github.com/breezeblue-ai/breeze-tts)
 - [官方模型权重和模型卡](https://huggingface.co/BreezeBlue/Breeze-TTS-2)
+- [九条非商业研究样音与参数](https://github.com/signerzwb/breeze-tts2-local-skill/releases/tag/samples-20261114)
+- [B 站图文：Breeze TTS 2 本地实测](https://www.bilibili.com/read/cv53912766)
+- [常见 TTS 功能定位对照](tts-comparison.md)
 
 ## 首次本地测试
 
